@@ -1,0 +1,125 @@
+Notes:
+
+A linear regression:
+
+price = m*(lot_size) + b
+
+When fitting a line to data, want b and m that minimize MSE:
+
+
+
+MSE = (1/n)*sum_i=1^n ((predictedPoint_i -  actualPoint_i)^2)
+
+One method: calculate MSE for each value of b and m. Find the combination that minimizes MSE. This could be done in excel, but it becomes difficult to consider all combinations of the constants
+
+	Issues: 1. Don't know the possible range of b. Could be any number.
+			2. Don't know the best step size for b.
+			3. Wildly expensive, especially as you add more features
+
+Gradient Descent offers a better way to find m and b. There are also others.
+
+			How does this stuff relate to linear least squares? Is that a brute force algorithm? I feel like we're doing the same thing.
+
+Assumption: Assume there's always a minimum in MSE vs. b.
+			As we get farther from the optimal b, the derivative of MSE (gradient) blows up (imagine a parabola). The "steepness" tells us how far we are from the optimal guess. The direction of the derivative tells you what side of the guess you're on.
+
+			w/ a parabola, if slope is negative, you're on the left. If positive, you're on the right.
+
+			Derivative of MSE: d(MSE)/db = 2/n * sum_i=1^n (b-Actual_i) // Assuming m=0
+
+Steps:
+	pick arbitrary starting value of b
+	calculate slope of MSE with b
+	is it tiny? if so, we're done
+	if not, multiply slope by an arbitary small value called a learning rate
+	subtract that from b
+	go back to 2 and repeat
+
+The only meaningful part of the slope is the sign. It tells us which direction to go. Subtracting the actual value is kinda bullshit. However, we can use the magnitude of slope to find the size jumps we need to make. But we don't need to do that. We could use arbitary numbers for that.
+
+If we only use slope directly, we might overcorrect for optimal b. That's why we use a learning rate. We never converge and the corrections get bigger and bigger, blowing up out toward +-infinity. The optimal larning rate depends on the nature of the data.
+
+Why not just calculate MSE twice and compare? Calculating the slope is essentially the same thing, but we only have to do a single operation.
+
+We want slope of 0. Why not just derivative set to 0 and solve for b? Doesn't work so hot for multiple unknowns
+
+TO INCLUDE m:
+
+	MSE = 1/n * sum_i=1^n(((m*x_i+b) - Actual_i)^2)
+	dMSE/db = 2/n * sum_i=1^n((m*x_i+b) - Actual_i)
+	dMSE/dm = 2/n * sum_i=1^n(x_i*((m*x_i+b)-Actual_i)
+
+	STEPS:
+		1. pick initial b and m
+		2. calculate slope of MSE WRT m and b
+		3. are both slopes small ? done : continue
+		4. multiply both slopes by learning rate (what if same learning rate doesn't work for both?)
+		5. subtract results from b and m. loop back to 2.
+
+	Still have to normalize or standardize when working with features of differing scale
+
+Slope equations can be written in terms of matrices. Remember that each row of matrix multiplication result is really a sum of the corresponding entries in the row of one matrix and the column of the other matrix.
+
+Gives a new set equations:
+
+Features^T * ((Features*Weights) - Labels) * 2/n
+
+Labels -> Tensor of label data
+Features -> Tensor of feature data
+n -> number of observations
+Weights -> M and B in a tensor
+
+Take feature set, add on an aribtrary column of ones and multiply by [m, b] to get mx + b for each x_i.
+
+Subtracting the labels is just subtracting the actual values.
+
+Transpose Features (with the ones column). Then, you have a 2x1 output, the first column is m, the second column is b.
+
+The above will work for any number of features. Same exact code. 
+
+We can gauge accuracy via coefficient of determinations
+
+R^2 = 1-(SS_res/SS_tot)
+
+SS_res -> Sum of squares residual
+SS_tot -> Sum of squares total
+
+-inf < R^2 <= 1
+
+Closer to 1 means better relationship between labels and features.
+
+SS_tot = sum_i=1^n(Actual - Avg)^2 // Intrinsic to data set
+SS-res = sum_i=1^n(Actual - Predicted)^2 // Depends on our algorithm
+
+SS_tot can be thought of as a baseline, kind of like the worst case; our algorithm is useless if we do worse than the average (SS_res > SS_tot).
+
+SS_res can be thought of as distance between the relationship given by the parameters we found, and the actual data. A smaller SS_res means closer to R^2 == 1.
+
+Can reduce the fucking around with learning rate by standardizing features
+	Use mean/variance to standardize, must be the same across the entire algorithm
+
+Can add new geatures easily: 
+	MPG = b + m1*Weight + m2*Displacement + m3*Horsepower
+	Now need to find m1, m2, m3 (multivariate linear regression)
+
+Learning rate can be a stingy motherfucker. In a long run time analysis, fucking around with learning
+rate is not practical. Fortunately, there are optimization methods
+
+	Adam
+	Adagrad
+	RMSProp
+	Momentum
+
+Custom:
+	Compare adjacent iterations of GD. If the MSE (THE ACTUAL ERROR, NOT THE SLOPE) went up, we have a shitty learning rate. Divide it by 2
+	If not, increase in order to get closer to solution.
+
+	Vectorize MSE = sum(((features*weights) - labels)^2)/n
+
+Can improve convergence
+
+Batch Gradient Descent -> Use a couple observations at a time to update M and B
+Stochastic Gradient Descent -> Use a single data set at a time
+
+
+They update the gradient more often, so converge faster

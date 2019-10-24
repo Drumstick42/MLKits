@@ -1,5 +1,5 @@
 {
-  "name": "knn-tf",
+  "name": "loadcsv",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -9,7 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@tensorflow/tfjs-node": "^0.1.21",
     "lodash": "^4.17.11",
     "shuffle-seed": "^1.1.6"
   }

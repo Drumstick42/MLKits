@@ -1,0 +1,4 @@
+Use npm init to initialize a package structure, then npm install --save package
+to load packages
+
+Let creates a variable that can be changed after initialization.

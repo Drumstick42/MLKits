@@ -2,7 +2,6 @@
 require('@tensorflow/tfjs-node');
 const tf = require('@tensorflow/tfjs');
 const loadCSV = require('./load-csv');
-const LinearRegression = require('./linear-regression');
 
 function knn(features, labels, predictionPoint, k) {
 	const { mean, variance } = tf.moments(features, 0);
